@@ -1,7 +1,5 @@
 import AVFoundation
 
-// AVAudioPCMBuffer is internally thread-safe; this conformance lets us
-// pass freshly-built buffers from a background queue to the main actor.
 extension AVAudioPCMBuffer: @retroactive @unchecked Sendable {}
 
 @MainActor
@@ -13,7 +11,6 @@ final class SoundManager {
     private let playerNode = AVAudioPlayerNode()
     private let mixerNode  = AVAudioMixerNode()
 
-    /// Serial queue for buffer generation so we never block the main thread.
     private let buildQueue = DispatchQueue(label: "SoundManager.build", qos: .userInitiated)
 
     private init() {
@@ -22,39 +19,36 @@ final class SoundManager {
         engine.connect(playerNode, to: mixerNode, format: nil)
         engine.connect(mixerNode, to: engine.mainMixerNode, format: nil)
 
+        SoundManager.ensureAudioSessionActive()
+
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playAndRecord,
-                                                            options: [.mixWithOthers, .defaultToSpeaker])
-            try AVAudioSession.sharedInstance().setActive(true)
             try engine.start()
         } catch {
             print("Audio engine failed:", error)
         }
     }
 
-    // MARK: - Cancel
+    static func ensureAudioSessionActive() {
+        do {
 
-    /// Gracefully fades out whatever is playing, then stops the node.
-    func cancelPending() {
-        fadeOutAndStop(duration: 0.5)
-    }
-
-    /// Schedules a short fade-out buffer, then stops the player once it finishes.
-    private func fadeOutAndStop(duration: Double = 0.5) {
-        buildQueue.async { [weak self] in
-            guard let self else { return }
-            guard let tail = self.buildBuffer(duration: duration, shape: .fade, amplitude: 0.22)
-            else { return }
-            DispatchQueue.main.async {
-                // Stop any queued buffers, then play a smooth fade-out tail.
-                self.playerNode.stop()
-                self.playerNode.scheduleBuffer(tail, at: nil, options: [])
-                self.playerNode.play()
-            }
+            try AVAudioSession.sharedInstance().setCategory(.playback,
+                                                            options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to activate AVAudioSession:", error)
         }
     }
 
-    // MARK: - Pink Noise State
+    func cancelPending() {
+        buildQueue.async { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+
+                self.playerNode.stop()
+                self.engine.pause()
+            }
+        }
+    }
 
     private struct PinkState {
         var b0 = 0.0, b1 = 0.0, b2 = 0.0, b3 = 0.0, b4 = 0.0, b5 = 0.0, b6 = 0.0
@@ -74,8 +68,6 @@ final class SoundManager {
             return p
         }
     }
-
-    // MARK: - Buffer Generation (off main thread)
 
     enum Shape { case swell, fade, bell }
 
@@ -100,7 +92,7 @@ final class SoundManager {
                 switch shape {
                 case .swell: env = sin(progress * .pi / 2)
                 case .fade:  env = cos(progress * .pi / 2)
-                case .bell:  env = sin(progress * .pi)       // 0 → peak → 0
+                case .bell:  env = sin(progress * .pi)
                 }
                 ch[frame] = Float(pink.next() * env) * amplitude
             }
@@ -108,14 +100,25 @@ final class SoundManager {
         return buffer
     }
 
-    // Builds on background, schedules + plays on main.
     private func asyncPlay(duration: Double, shape: Shape, amplitude: Float = 0.22) {
         buildQueue.async { [weak self] in
             guard let self else { return }
-            // Build the main buffer and a short lead-in fade if needed.
+
             guard let buf = self.buildBuffer(duration: duration, shape: shape, amplitude: amplitude)
             else { return }
             DispatchQueue.main.async {
+
+//                guard self.engine.isRunning else { return }
+                
+                if !self.engine.isRunning {
+                    do {
+                        try self.engine.start()
+                    } catch {
+                        print("Engine restart failed:", error)
+                        return
+                    }
+                }
+
                 self.playerNode.stop()
                 self.playerNode.scheduleBuffer(buf, at: nil, options: [])
                 self.playerNode.play()
@@ -123,18 +126,13 @@ final class SoundManager {
         }
     }
 
-    // MARK: - Phase Cues
-
     func playInhaleSequence(duration: Double) {
-        // Bell shape: swells up then fades back to zero within the inhale window,
-        // so the noise naturally dissolves to silence right as hold begins.
+
         asyncPlay(duration: duration, shape: .bell)
     }
 
     func playHold() {
-        // The inhale buffer already fades to zero by the time hold starts (bell shape),
-        // so we just let the player finish naturally — no abrupt stop needed.
-        // Nothing to do here.
+
     }
 
     func playExhaleSequence(duration: Double) {
@@ -154,5 +152,11 @@ final class SoundManager {
                 self.playerNode.play()
             }
         }
+    }
+    
+    func hardStop() {
+        playerNode.stop()
+        playerNode.reset()
+        engine.pause()
     }
 }

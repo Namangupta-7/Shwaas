@@ -8,9 +8,12 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(colorScheme)
+                .onAppear {
+                    SoundManager.ensureAudioSessionActive()
+                }
         }
     }
-    
+
     private var colorScheme: ColorScheme? {
         switch appThemeTitle {
         case "Light": return .light
@@ -19,4 +22,3 @@ struct MyApp: App {
         }
     }
 }
- 

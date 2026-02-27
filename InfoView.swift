@@ -9,81 +9,86 @@ struct InfoView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
 
+                    // Title
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Shwaas")
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text("श्वास — breath as a path inward.")
+                        Text("श्वास — breath as balance.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("Roots", systemImage: "leaf")
+                    Image("shwaas_hero")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 190)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+
+                    // Why
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Why", systemImage: "sunrise")
                             .font(.headline)
 
-                        Text("Pranayama is one of the eight limbs of Ashtanga yoga, codified by the sage Patanjali in the Yoga Sutras over two thousand years ago. The word itself comes from Sanskrit: *prana* (life force) and *ayama* (expansion). To regulate breath was to regulate life itself.")
-                            .foregroundColor(.secondary)
+                        Text("""
+As a child, I watched my mother practice yoga each morning. Years later, during stress and sleeplessness, I rediscovered those same breathing rhythms.
 
-                        Text("The Hatha Yoga Pradipika — a 15th-century Sanskrit text — describes pranayama as the most direct means of calming the mind. Not metaphor. Practice.")
-                            .foregroundColor(.secondary)
+Shwaas is my reinterpretation of that inherited calm.
+""")
+                        .foregroundColor(.secondary)
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("The Three Modes", systemImage: "circle.grid.3x3")
+                    // Roots & Translation
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Reinterpreting Pranayama", systemImage: "leaf")
                             .font(.headline)
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            breathingRow(title: "Shanti — शान्ति", subtitle: "Peace, calm")
-                            breathingRow(title: "Dharana — धारणा", subtitle: "Concentration")
-                            breathingRow(title: "Nidra — निद्रा", subtitle: "Yogic sleep")
-                        }
+                        Text("""
+Inspired by classical pranayama practices such as Sama Vritti, Nadi Shodhana, and extended calming breath cycles, Shwaas translates traditional rhythm into visual motion and guided timing.
 
-                        Text("Each mode follows a different rhythm — the timing of inhale, hold, and exhale adjusted for its intention. Nidra uses the longest exhale, designed to activate the parasympathetic nervous system.")
-                            .foregroundColor(.secondary)
+It does not replicate tradition — it reimagines it digitally.
+""")
+                        .foregroundColor(.secondary)
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("The Breathing Cycle", systemImage: "arrow.3.trianglepath")
+                    // Modes
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Rhythms", systemImage: "timer")
                             .font(.headline)
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            breathingRow(title: "Puraka — पूरक", subtitle: "Inhale")
-                            breathingRow(title: "Kumbhaka — कुम्भक", subtitle: "Hold")
-                            breathingRow(title: "Rechaka — रेचक", subtitle: "Exhale")
-                        }
-
-                        Text("These three Sanskrit terms have been used by practitioners for millennia. Kumbhaka — the hold — is considered the most potent phase: the moment the breath, the mind, and awareness become one.")
-                            .foregroundColor(.secondary)
+                        breathingRow(title: "Shanti", subtitle: "Equal, grounding breath")
+                        breathingRow(title: "Dharana", subtitle: "Focused alternating rhythm")
+                        breathingRow(title: "Nidra", subtitle: "Extended calming cycle")
                     }
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("Sound Guidance", systemImage: "waveform")
+                    // Closing
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("A Quiet Practice", systemImage: "heart")
                             .font(.headline)
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            breathingRow(title: "Off", subtitle: "Pure silence")
-                            breathingRow(title: "Noise", subtitle: "Pink noise, breath-synced")
-                            breathingRow(title: "Speech", subtitle: "Spoken phase cues")
-                        }
+                        Text("""
+Shwaas is not a productivity tool.
 
-                        Text("Pink noise mirrors the acoustic texture of rain, wind, and rivers — sounds considered auspicious in many Indian traditions. Shwaas generates it in real time, shaping each burst to match the arc of your breath.")
-                            .foregroundColor(.secondary)
+It is a pause — a reminder that breath remains our most accessible anchor.
+""")
+                        .foregroundColor(.secondary)
                     }
 
                 }
-                .padding()
+                .padding(24)
             }
-            .navigationTitle("")
+            .navigationTitle("About")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.secondary)
+                            .frame(width: 32, height: 32)
                     }
                 }
             }

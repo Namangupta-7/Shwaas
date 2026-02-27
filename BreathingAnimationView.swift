@@ -4,32 +4,63 @@ struct BreathingAnimationView: View {
 
     let mode: BreathingMode
     let isRunning: Bool
-    /// Live mic amplitude 0–1. When nil the view falls back to timer-driven animation.
-    var micLevel: Float? = nil
 
     @State private var lastPhase: Phase?
     @AppStorage("audioGuidanceMode") var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var startTime: TimeInterval = Date().timeIntervalSinceReferenceDate
+    @State private var pauseOffset: TimeInterval = 0
 
     enum Phase {
         case inhale
-        case hold
+        case holdFull
         case exhale
+        case holdEmpty
     }
 
     var body: some View {
 
-        // Reduce-motion: static circle + phase label, no pulsing.
-        if reduceMotion {
-            staticView
-        } else if let mic = micLevel, isRunning {
-            micDrivenView(mic: mic)
-        } else {
-            timerDrivenView
+        Group {
+
+            if reduceMotion {
+                staticView
+            } else {
+                timerDrivenView
+            }
+        }
+        .onDisappear {
+            HapticManager.shared.stopOmVibration()
+        }
+        .onChange(of: isRunning) { running in
+            if running {
+
+                startTime = Date().timeIntervalSinceReferenceDate - pauseOffset
+
+                if pauseOffset == 0 {
+                    lastPhase = nil
+                    handlePhaseChange(.inhale, cycleCount: 0, forceRun: true)
+                }
+            } else {
+
+                let t = Date().timeIntervalSinceReferenceDate - startTime
+                pauseOffset = t.truncatingRemainder(dividingBy: timing.total)
+
+                HapticManager.shared.stopOmVibration()
+                VoiceGuidanceManager.shared.stop()
+
+                if AudioGuidanceMode(rawValue: audioGuidanceMode) == .tones {
+                    SoundManager.shared.cancelPending()
+                }
+            }
+        }
+        .onAppear {
+            if isRunning {
+                startTime = Date().timeIntervalSinceReferenceDate
+                lastPhase = nil
+                handlePhaseChange(.inhale, cycleCount: 0, forceRun: true)
+            }
         }
     }
-
-    // MARK: - Reduce-Motion Static View
 
     private var staticView: some View {
         ZStack {
@@ -45,61 +76,27 @@ struct BreathingAnimationView: View {
                 .fill(sizeColor(for: 1.0))
                 .frame(width: 170, height: 170)
 
-            phaseLabel(phase: lastPhase ?? .inhale)
+            phaseLabel(phase: lastPhase ?? .inhale, cycleCount: 0)
         }
         .frame(width: 300, height: 300)
         .opacity(isRunning ? 1 : 0.4)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Breathing circle")
-        .accessibilityValue(lastPhase.map { phaseText(for: $0) } ?? "Inhale")
+        .accessibilityValue(lastPhase.map { phaseText(for: $0, cycleCount: 0) } ?? "Breathe in")
     }
-
-    // MARK: - Mic-Driven View
-
-    private func micDrivenView(mic: Float) -> some View {
-        // Map 0–1 mic level to scale 0.85–1.15
-        let s: CGFloat = 0.85 + CGFloat(mic) * 0.30
-
-        // Phase is inferred from rising/holding/falling mic (simplified: above 0.5 = inhale/hold, below = exhale)
-        let inferredPhase: Phase = mic > 0.55 ? .hold : mic > 0.15 ? .inhale : .exhale
-
-        return ZStack {
-            Circle()
-                .stroke(sizeColor(for: s).opacity(0.3), lineWidth: 2)
-                .frame(width: 260, height: 260)
-                .scaleEffect(s)
-
-            Circle()
-                .stroke(sizeColor(for: s).opacity(0.6), lineWidth: 3)
-                .frame(width: 220, height: 220)
-                .scaleEffect(s)
-
-            Circle()
-                .fill(sizeColor(for: s))
-                .frame(width: 170, height: 170)
-                .scaleEffect(s)
-                .animation(.easeOut(duration: 0.1), value: s)
-
-            phaseLabel(phase: inferredPhase)
-        }
-        .frame(width: 300, height: 300)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Breathing circle — mic active")
-        .accessibilityValue(phaseText(for: inferredPhase))
-    }
-
-    // MARK: - Timer-Driven View (original behaviour)
 
     private var timerDrivenView: some View {
         TimelineView(.animation) { timeline in
-
-            let t = isRunning ? timeline.date.timeIntervalSinceReferenceDate : 0
-            let phaseValue = normalizedPhase(time: t, duration: cycleDuration)
-            let phase = currentPhase(for: phaseValue)
+            
+            let t = isRunning ? (timeline.date.timeIntervalSinceReferenceDate - startTime) : 0
+            let ct = cycleTime(time: t)
+//            let phase = currentPhase(for: ct)
+            let phase = isRunning ? currentPhase(for: ct) : .holdEmpty
+            let currentCycle = timing.total > 0 ? Int(t / timing.total) : 0
 
             ZStack {
 
-                let s = scale(for: phaseValue)
+                let s = scale(for: ct)
 
                 Circle()
                     .stroke(sizeColor(for: s).opacity(0.3), lineWidth: 2)
@@ -119,71 +116,102 @@ struct BreathingAnimationView: View {
                     .scaleEffect(s)
                     .accessibilityHidden(true)
 
-                phaseLabel(phase: phase)
+                phaseLabel(phase: phase, cycleCount: currentCycle)
             }
             .frame(width: 300, height: 300)
             .opacity(isRunning ? 1 : 0.4)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Breathing circle")
-            .accessibilityValue(phaseText(for: phase))
-            .onChange(of: phase) { oldValue, newValue in
-                handlePhaseChange(newValue)
+            .accessibilityValue(phaseText(for: phase, cycleCount: currentCycle))
+            .onChange(of: phase) { newValue in
+                handlePhaseChange(newValue, cycleCount: currentCycle, forceRun: isRunning)
             }
         }
     }
 
-    // MARK: - Phase Label
-
-    private func phaseLabel(phase: Phase) -> some View {
+    private func phaseLabel(phase: Phase, cycleCount: Int) -> some View {
         VStack(spacing: 3) {
             Text(sanskritText(for: phase))
                 .font(.headline)
                 .foregroundColor(.white)
-            Text(phaseText(for: phase))
+            Text(phaseText(for: phase, cycleCount: cycleCount))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundColor(.white)
         }
-        .accessibilityHidden(true) // announced by parent accessibilityValue
+        .accessibilityHidden(true)
     }
 
-    // MARK: Phase Logic
+    private struct CycleTiming {
+        let inhale: Double
+        let holdFull: Double
+        let exhale: Double
+        let holdEmpty: Double
 
-    private func normalizedPhase(time: TimeInterval, duration: Double) -> Double {
-        (time.truncatingRemainder(dividingBy: duration)) / duration
+        var total: Double { inhale + holdFull + exhale + holdEmpty }
     }
 
-    private func currentPhase(for value: Double) -> Phase {
-        switch value {
-        case 0.0..<0.4:
-            return .inhale
-        case 0.4..<0.6:
-            return .hold
-        default:
-            return .exhale
+    private var timing: CycleTiming {
+        switch mode {
+        case .calm:
+
+            return CycleTiming(inhale: 4, holdFull: 4, exhale: 4, holdEmpty: 4)
+        case .focus:
+
+            return CycleTiming(inhale: 4, holdFull: 0, exhale: 4, holdEmpty: 0)
+        case .sleep:
+
+            return CycleTiming(inhale: 4, holdFull: 7, exhale: 8, holdEmpty: 0)
         }
     }
 
-    private func scale(for value: Double) -> CGFloat {
-        switch value {
-        case 0.0..<0.4:
-            return 0.85 + (value / 0.4) * 0.3
-        case 0.4..<0.6:
-            return 1.15
-        default:
-            return 1.15 - ((value - 0.6) / 0.4) * 0.3
+    private func cycleTime(time: TimeInterval) -> Double {
+        time.truncatingRemainder(dividingBy: timing.total)
+    }
+
+    private func currentPhase(for t: Double) -> Phase {
+        let tm = timing
+        if t < tm.inhale { return .inhale }
+        if t < tm.inhale + tm.holdFull { return .holdFull }
+        if t < tm.inhale + tm.holdFull + tm.exhale { return .exhale }
+        return .holdEmpty
+    }
+
+    private func scale(for t: Double) -> CGFloat {
+        let tm = timing
+        let minScale: CGFloat = 0.85
+        let maxScale: CGFloat = 1.15
+
+        if t < tm.inhale {
+
+            let progress = t / tm.inhale
+            return minScale + (maxScale - minScale) * progress
+        } else if t < tm.inhale + tm.holdFull {
+
+            return maxScale
+        } else if t < tm.inhale + tm.holdFull + tm.exhale {
+
+            let progress = (t - (tm.inhale + tm.holdFull)) / tm.exhale
+            return maxScale - (maxScale - minScale) * progress
+        } else {
+
+            return minScale
         }
     }
 
-    private func phaseText(for phase: Phase) -> String {
+    private func phaseText(for phase: Phase, cycleCount: Int) -> String {
         switch phase {
-        case .inhale: return "Inhale"
-        case .hold:   return "Hold"
-        case .exhale: return "Exhale"
+        case .inhale:
+            if mode == .focus { return cycleCount % 2 == 0 ? "Breathe In Left" : "Breathe In Right" }
+            return "Breathe In"
+        case .holdFull: return "Pause"
+        case .exhale:
+            if mode == .focus { return cycleCount % 2 == 0 ? "Release Right" : "Release Left" }
+            return "Release"
+        case .holdEmpty: return "Pause"
         }
     }
 
-    /// Interpolates between two colours based on the circle's current scale.
     private func sizeColor(for s: CGFloat) -> Color {
         let minScale: CGFloat = 0.85
         let maxScale: CGFloat = 1.15
@@ -192,13 +220,13 @@ struct BreathingAnimationView: View {
 
         switch mode {
         case .calm:
-            // Saffron (amber) at rest → bright marigold at full inhale
+
             return Color(hue: lerp(0.06, 0.09), saturation: lerp(0.85, 0.95), brightness: lerp(0.60, 0.95))
         case .focus:
-            // Deep lapis at rest → bright indigo at full inhale
+
             return Color(hue: lerp(0.70, 0.65), saturation: lerp(0.85, 0.70), brightness: lerp(0.40, 0.88))
         case .sleep:
-            // Deep maroon at rest → soft rose at full inhale
+
             return Color(hue: lerp(0.91, 0.87), saturation: lerp(0.70, 0.45), brightness: lerp(0.30, 0.72))
         }
     }
@@ -206,37 +234,31 @@ struct BreathingAnimationView: View {
     private func sanskritText(for phase: Phase) -> String {
         switch phase {
         case .inhale: return "Puraka"
-        case .hold:   return "Kumbhaka"
+        case .holdFull: return "Antara Kumbhaka"
         case .exhale: return "Rechaka"
+        case .holdEmpty: return "Bahya Kumbhaka"
         }
     }
 
-    // MARK: Timing
-
-    private var cycleDuration: Double {
-        switch mode {
-        case .calm: return 10
-        case .focus: return 9
-        case .sleep: return 12
-        }
-    }
-
-    private var inhaleDuration: Double { cycleDuration * 0.4 }
-    private var exhaleDuration: Double { cycleDuration * 0.4 }
-
-    // MARK: Phase Audio Guidance & Haptics
-
-    private func handlePhaseChange(_ phase: Phase) {
-        guard isRunning else { return }
-
-        // Trigger subtle haptic feedback on every phase change
+    private func handlePhaseChange(_ phase: Phase, cycleCount: Int, forceRun: Bool = false) {
+        guard isRunning || forceRun else { return }
+        
         if phase != lastPhase {
             let impact = UIImpactFeedbackGenerator(style: .light)
             impact.impactOccurred()
+
+            if phase == .exhale && (mode == .calm || mode == .sleep) {
+                HapticManager.shared.startOmVibration()
+            } else {
+                HapticManager.shared.stopOmVibration()
+            }
         }
 
         let guidanceMode = AudioGuidanceMode(rawValue: audioGuidanceMode) ?? .off
-        guard guidanceMode != .off else { return }
+        guard guidanceMode != .off else {
+            lastPhase = phase
+            return
+        }
         guard phase != lastPhase else { return }
 
         lastPhase = phase
@@ -244,19 +266,29 @@ struct BreathingAnimationView: View {
         switch guidanceMode {
         case .tones:
             switch phase {
-            case .inhale: SoundManager.shared.playInhaleSequence(duration: inhaleDuration)
-            case .hold:   SoundManager.shared.playHold()
-            case .exhale: SoundManager.shared.playExhaleSequence(duration: exhaleDuration)
+            case .inhale: SoundManager.shared.playInhaleSequence(duration: timing.inhale)
+            case .holdFull, .holdEmpty: SoundManager.shared.playHold()
+            case .exhale: SoundManager.shared.playExhaleSequence(duration: timing.exhale)
             }
         case .speech:
             switch phase {
-            case .inhale: VoiceGuidanceManager.shared.speak("Breathe in")
-            case .hold:   VoiceGuidanceManager.shared.speak("Gently hold")
-            case .exhale: VoiceGuidanceManager.shared.speak("Breathe out")
+            case .inhale:
+                if mode == .focus {
+                    VoiceGuidanceManager.shared.speak(cycleCount % 2 == 0 ? "Block right, breathe in left" : "Block left, breathe in right")
+                } else {
+                    VoiceGuidanceManager.shared.speak("Breathe in")
+                }
+            case .holdFull: VoiceGuidanceManager.shared.speak("Pause")
+            case .exhale:
+                if mode == .focus {
+                    VoiceGuidanceManager.shared.speak(cycleCount % 2 == 0 ? "Block left, release right" : "Block right, release left")
+                } else {
+                    VoiceGuidanceManager.shared.speak("Release")
+                }
+            case .holdEmpty: VoiceGuidanceManager.shared.speak("Pause")
             }
         case .off:
             break
         }
     }
 }
-

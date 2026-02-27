@@ -6,6 +6,7 @@ struct ContentView: View {
     @AppStorage("audioGuidanceMode") var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("appTheme") var appThemeTitle: String = "Dark"
+    @State private var showOnboarding = false
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -15,7 +16,6 @@ struct ContentView: View {
 
                 VStack(alignment: .leading, spacing: 28) {
 
-                    // MARK: Header
                     VStack(alignment: .leading, spacing: 8) {
 
                         HStack {
@@ -30,13 +30,10 @@ struct ContentView: View {
                                 showSettings = true
                             } label: {
                                 Image(systemName: "gearshape.fill")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(.primary)
-                                    .frame(width: 32, height: 32)
-                                    .background(
-                                        Circle()
-                                            .fill(Color.primary.opacity(0.1))
-                                    )
+                                    .frame(width: 40, height: 40)
+                                    .background(.ultraThinMaterial, in: Circle())
                             }
                             .buttonStyle(.plain)
                             .accessibilityLabel("Settings")
@@ -47,7 +44,6 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    // MARK: Mode Cards — 2-col grid on iPad, single column on iPhone
                     if hSizeClass == .regular {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                             modeCards
@@ -60,27 +56,34 @@ struct ContentView: View {
                 }
                 .padding()
             }
+            .scrollIndicators(.hidden)
             .sheet(isPresented: $showSettings) {
                 SettingsView()
                     .preferredColorScheme(colorScheme)
                     .id(appThemeTitle)
             }
-            .fullScreenCover(isPresented: Binding(
-                get: { !hasSeenOnboarding },
-                set: { if !$0 { hasSeenOnboarding = true } }
-            )) {
+            .fullScreenCover(isPresented: $showOnboarding) {
                 OnboardingView()
                     .preferredColorScheme(colorScheme)
+                    .onDisappear {
+                        hasSeenOnboarding = true
+                    }
+            }
+            .onAppear {
+                if !hasSeenOnboarding {
+                    showOnboarding = true
+                }
+            }
+            .onChange(of: hasSeenOnboarding) { newValue in
+                if !newValue {
+                    showOnboarding = true
+                }
             }
         }
     }
 
     private var colorScheme: ColorScheme? {
-        switch appThemeTitle {
-        case "Light": return .light
-        case "Dark": return .dark
-        default: return nil
-        }
+        appThemeTitle == "Light" ? .light : .dark
     }
 
     @ViewBuilder
@@ -92,7 +95,7 @@ struct ContentView: View {
                 title: "Shanti",
                 subtitle: "Calm",
                 description: "Cultivating inner stillness",
-                gradient: [Color(hue: 0.08, saturation: 0.75, brightness: 0.92),
+                gradient: [BreathingMode.calm.color,
                        Color(hue: 0.04, saturation: 0.85, brightness: 0.55)],
                 icon: "leaf.fill",
                 mandalaStyle: .lotus
@@ -136,8 +139,6 @@ struct ContentView: View {
     ContentView()
 }
 
-// MARK: - Card View
-
 struct HomeCardView: View {
 
     let title: String
@@ -157,7 +158,6 @@ struct HomeCardView: View {
             )
             .accessibilityHidden(true)
 
-            // Massive, faint mandala watermark bleeding off the right edge
             GeometryReader { geo in
                 MandalaView(style: mandalaStyle, color: gradient.first ?? .white, opacity: 0.15)
                     .frame(width: geo.size.height * 1.8, height: geo.size.height * 1.8)

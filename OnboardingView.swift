@@ -5,9 +5,17 @@ struct OnboardingView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var currentPage = 0
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.verticalSizeClass)   private var vSizeClass
+    @Environment(\.dismiss) private var dismiss
+
+    private var isLandscape: Bool {
+        hSizeClass == .regular || vSizeClass == .compact
+    }
+
     var body: some View {
         ZStack {
-            // Animated gradient background that shifts with each page
+
             LinearGradient(
                 colors: backgroundColors[currentPage],
                 startPoint: .topLeading,
@@ -25,9 +33,8 @@ struct OnboardingView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
-                // Page dots + next/begin button
                 VStack(spacing: 20) {
-                    // Dot indicators
+
                     HStack(spacing: 8) {
                         ForEach(0..<4) { i in
                             Circle()
@@ -55,156 +62,187 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Cards
-
     private var card1: some View {
-        VStack(spacing: 20) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            let content = VStack(spacing: 20) {
+                Text("श्वास")
+                    .font(.system(size: isLandscape ? 96 : 72, weight: .thin))
+                    .foregroundColor(.white)
 
-            Text("श्वास")
-                .font(.system(size: 72, weight: .thin))
-                .foregroundColor(.white)
+                Text("Shwaas")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white.opacity(0.85))
 
-            Text("Shwaas")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.white.opacity(0.85))
+                Spacer().frame(height: 8)
 
-            Spacer().frame(height: 8)
+                Text("\"Chale vāte chalaṁ chittam\nnishchale nishchalaṁ bhavet.\"")
+                    .font(.title3)
+                    .fontWeight(.light)
+                    .foregroundColor(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .italic()
+                    .padding(.horizontal, isLandscape ? 0 : 32)
 
-            Text("\"Chale vāte chalaṁ chittam\nnishchale nishchalaṁ bhavet.\"")
-                .font(.title3)
-                .fontWeight(.light)
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .italic()
-                .padding(.horizontal, 32)
+                Text("When the breath is steady, the mind becomes steady.")
+                    .font(.footnote)
+                    .foregroundColor(.white.opacity(0.60))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, isLandscape ? 0 : 32)
 
-            Text("When the breath moves, the mind moves.\nWhen the breath is still, the mind is still.")
-                .font(.footnote)
-                .foregroundColor(.white.opacity(0.60))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                Text("— Hatha Yoga Pradipika, 15th century")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.45))
+                    .multilineTextAlignment(.center)
+            }
 
-            Spacer()
-
-            Text("— Hatha Yoga Pradipika, 15th century")
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.45))
-                .multilineTextAlignment(.center)
-
-            Spacer()
+            if isLandscape {
+                HStack(spacing: 60) {
+                    content
+                    Spacer()
+                }
+                .padding(60)
+                .frame(minHeight: 400)
+            } else {
+                VStack {
+                    Spacer()
+                    content
+                    Spacer()
+                }
+                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+            }
         }
+        .scrollIndicators(.hidden)
     }
 
     private var card2: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            if isLandscape {
+                HStack(spacing: 40) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Three Practices")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        Text("A return to breath")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Three Practices")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.bottom, 8)
-
-            Text("Each rooted in a different intention")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.bottom, 40)
-
-            VStack(spacing: 20) {
-                practiceRow(
-                    icon: "leaf.fill",
-                    sanskrit: "Shanti",
-                    english: "Calm",
-                    description: "Cultivating inner stillness"
-                )
-                practiceRow(
-                    icon: "scope",
-                    sanskrit: "Dharana",
-                    english: "Focus",
-                    description: "Steady attention through breath"
-                )
-                practiceRow(
-                    icon: "moon.stars.fill",
-                    sanskrit: "Nidra",
-                    english: "Sleep",
-                    description: "Gentle descent into rest"
-                )
+                    VStack(spacing: 16) {
+                        practiceRow(icon: "leaf.fill", sanskrit: "Shanti", english: "Calm", description: "Cultivating inner stillness")
+                        practiceRow(icon: "scope", sanskrit: "Dharana", english: "Focus", description: "Steady attention through breath")
+                        practiceRow(icon: "moon.stars.fill", sanskrit: "Nidra", english: "Sleep", description: "Gentle descent into rest")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(60)
+                .frame(minHeight: 400)
+            } else {
+                VStack(spacing: 0) {
+                    Spacer()
+                    Text("Three Practices").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
+                    Text("A return to breath").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
+                    VStack(spacing: 20) {
+                        practiceRow(icon: "leaf.fill", sanskrit: "Shanti", english: "Calm", description: "Cultivating inner stillness")
+                        practiceRow(icon: "scope", sanskrit: "Dharana", english: "Focus", description: "Steady attention through breath")
+                        practiceRow(icon: "moon.stars.fill", sanskrit: "Nidra", english: "Sleep", description: "Gentle descent into rest")
+                    }.padding(.horizontal, 28)
+                    Spacer()
+                }
+                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
             }
-            .padding(.horizontal, 28)
-
-            Spacer()
         }
+        .scrollIndicators(.hidden)
     }
 
     private var card3: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            if isLandscape {
+                HStack(spacing: 40) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Sound Guidance")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        Text("Choose what you hear during practice")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Sound Guidance")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.bottom, 8)
-
-            Text("Choose what you hear during practice")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.bottom, 40)
-
-            VStack(spacing: 20) {
-                audioRow(icon: "speaker.slash.fill", title: "Off",    description: "Pure silence")
-                audioRow(icon: "waveform",           title: "Noise",  description: "Pink noise follows your breath — swells on inhale, dissolves on hold")
-                audioRow(icon: "mic.fill",           title: "Speech", description: "A gentle voice guides each phase")
+                    VStack(spacing: 16) {
+                        audioRow(icon: "speaker.slash.fill", title: "Off", description: "Pure silence")
+                        audioRow(icon: "waveform", title: "Noise", description: "Pink noise follows your breath")
+                        audioRow(icon: "mic.fill", title: "Speech", description: "A gentle voice guides each phase")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(60)
+                .frame(minHeight: 400)
+            } else {
+                VStack(spacing: 0) {
+                    Spacer()
+                    Text("Sound Guidance").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
+                    Text("Choose what you hear during practice").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
+                    VStack(spacing: 16) {
+                        audioRow(icon: "speaker.slash.fill", title: "Off", description: "Pure silence")
+                        audioRow(icon: "waveform", title: "Noise", description: "Pink noise follows your breath — swells as you breathe in, dissolves on pause")
+                        audioRow(icon: "mic.fill", title: "Speech", description: "A gentle voice guides each phase")
+                    }.padding(.horizontal, 28)
+                    Spacer()
+                }
+                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
             }
-            .padding(.horizontal, 28)
-
-            Spacer()
-
-            Text("You can change this anytime from Settings.")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.55))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            Spacer()
         }
+        .scrollIndicators(.hidden)
     }
 
     private var card4: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            if isLandscape {
+                HStack(spacing: 40) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        Image(systemName: "rectangle.landscape.rotate")
+                            .font(.system(size: 80, weight: .thin))
+                            .foregroundColor(.white)
 
-            Image(systemName: "rectangle.landscape.rotate")
-                .font(.system(size: 64, weight: .thin))
-                .foregroundColor(.white)
-                .padding(.bottom, 24)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Desk Mode")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            Text("For your nightstand or desk")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Desk Mode")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.bottom, 8)
-
-            Text("For your nightstand or desk")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.bottom, 40)
-
-            Text("Turn your device sideways during a session. The interface adapts instantly, giving the breath room to expand while keeping the time clearly visible.")
-                .font(.body)
-                .foregroundColor(.white.opacity(0.9))
-                .multilineTextAlignment(.center)
-                .lineSpacing(6)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 60)
-
-            Spacer()
+                    Text("Turn your device sideways during a session. The interface adapts instantly, giving the breath room to expand while keeping the time clearly visible.")
+                        .font(.body)
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(60)
+                .frame(minHeight: 400)
+            } else {
+                VStack(spacing: 0) {
+                    Spacer()
+                    Image(systemName: "rectangle.landscape.rotate").font(.system(size: 64, weight: .thin)).foregroundColor(.white).padding(.bottom, 24)
+                    Text("Desk Mode").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
+                    Text("For your nightstand or desk").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
+                    Text("Rotate your device to enter Desk Mode. This gives the breath space to expand visually, allowing you to practice without holding your device.")
+                        .font(.body).foregroundColor(.white.opacity(0.9)).multilineTextAlignment(.center).lineSpacing(6).padding(.horizontal, 32).padding(.bottom, 60)
+                    Spacer()
+                }
+                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+            }
         }
+        .scrollIndicators(.hidden)
     }
-
-    // MARK: - Reusable Rows
 
     private func practiceRow(icon: String, sanskrit: String, english: String, description: String) -> some View {
         HStack(spacing: 16) {
@@ -256,30 +294,28 @@ struct OnboardingView: View {
         .cornerRadius(16)
     }
 
-    // MARK: - Helpers
-
     private func advance() {
         if currentPage < 3 {
             withAnimation { currentPage += 1 }
         } else {
-            withAnimation { hasSeenOnboarding = true }
+            withAnimation {
+                hasSeenOnboarding = true
+                dismiss()
+            }
         }
     }
 
     private let backgroundColors: [[Color]] = [
-        // Page 1: Saffron / Amber (matches Shanti)
-        [Color(hue: 0.08, saturation: 0.75, brightness: 0.92),
+
+        [BreathingMode.calm.color,
          Color(hue: 0.04, saturation: 0.85, brightness: 0.55)],
-        
-        // Page 2: Lapis Indigo (matches Dharana)
+
         [Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
          Color(hue: 0.71, saturation: 0.85, brightness: 0.35)],
-        
-        // Page 3: Deep Maroon (matches Nidra)
+
         [Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
          Color(hue: 0.92, saturation: 0.70, brightness: 0.12)],
-        
-        // Page 4: Deep Teal/Pine (Grounded, focus)
+
         [Color(hue: 0.48, saturation: 0.68, brightness: 0.48),
          Color(hue: 0.52, saturation: 0.82, brightness: 0.18)]
     ]
