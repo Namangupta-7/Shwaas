@@ -20,11 +20,6 @@ struct InfoView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    Image("shwaas_hero")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 190)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
 
                     // Why
                     VStack(alignment: .leading, spacing: 10) {

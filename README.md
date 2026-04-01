@@ -8,8 +8,6 @@
 > **"When the breath is steady, the mind becomes steady."**
 > — Hatha Yoga Pradipika, 15th century
 
-![Shwaas Hero](media/hero.png)
-
 Shwaas is a premium breathing and meditation application designed to bring tranquility to your daily life. Built natively for iPhone and iPad using SwiftUI, it combines ancient wisdom with modern technology to provide a sanctuary for your mind.
 
 ---
