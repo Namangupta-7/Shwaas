@@ -33,23 +33,18 @@ struct BreathingAnimationView: View {
         .onDisappear {
             HapticManager.shared.stopOmVibration()
         }
-        .onChange(of: isRunning) { running in
+        .onChange(of: isRunning) { old, running in
             if running {
-
                 startTime = Date().timeIntervalSinceReferenceDate - pauseOffset
-
                 if pauseOffset == 0 {
                     lastPhase = nil
                     handlePhaseChange(.inhale, cycleCount: 0, forceRun: true)
                 }
             } else {
-
                 let t = Date().timeIntervalSinceReferenceDate - startTime
                 pauseOffset = t.truncatingRemainder(dividingBy: timing.total)
-
                 HapticManager.shared.stopOmVibration()
                 VoiceGuidanceManager.shared.stop()
-
                 if AudioGuidanceMode(rawValue: audioGuidanceMode) == .tones {
                     SoundManager.shared.cancelPending()
                 }
@@ -129,7 +124,7 @@ struct BreathingAnimationView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Breathing circle")
             .accessibilityValue(phaseText(for: phase, cycleCount: currentCycle))
-            .onChange(of: phase) { newValue in
+            .onChange(of: phase) { old, newValue in
                 handlePhaseChange(
                     newValue,
                     cycleCount: currentCycle,

@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    @State private var currentPage = 0
-
+    @State private var viewModel = OnboardingViewModel()
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.dismiss) private var dismiss
@@ -14,18 +11,19 @@ struct OnboardingView: View {
     }
 
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         ZStack {
-
             LinearGradient(
-                colors: backgroundColors[currentPage],
+                colors: viewModel.backgroundColor(for: viewModel.currentPage),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            .animation(.easeInOut(duration: 0.6), value: currentPage)
+            .animation(.easeInOut(duration: 0.6), value: viewModel.currentPage)
 
             VStack(spacing: 0) {
-                TabView(selection: $currentPage) {
+                TabView(selection: $viewModel.currentPage) {
                     card1.tag(0)
                     card2.tag(1)
                     card3.tag(2)
@@ -34,37 +32,36 @@ struct OnboardingView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
                 VStack(spacing: 20) {
-
                     HStack(spacing: 8) {
-                        ForEach(0..<4) { i in
+                        ForEach(0..<4, id: \.self) { i in
                             Circle()
                                 .fill(
-                                    i == currentPage
+                                    i == viewModel.currentPage
                                         ? Color.white
                                         : Color.white.opacity(0.35)
                                 )
                                 .frame(
-                                    width: i == currentPage ? 10 : 7,
-                                    height: i == currentPage ? 10 : 7
+                                    width: i == viewModel.currentPage ? 10 : 7,
+                                    height: i == viewModel.currentPage ? 10 : 7
                                 )
                                 .animation(
                                     .spring(response: 0.3),
-                                    value: currentPage
+                                    value: viewModel.currentPage
                                 )
                         }
                     }
 
-                    Button(action: advance) {
-                        Text(currentPage == 3 ? "Begin" : "Next")
+                    Button(action: { viewModel.advance(dismissAction: { dismiss() }) }) {
+                        Text(viewModel.currentPage == 3 ? "Begin" : "Next")
                             .fontWeight(.semibold)
-                            .foregroundColor(buttonTextColor)
+                            .foregroundColor(viewModel.currentButtonTextColor)
                             .padding(.horizontal, 28)
                             .padding(.vertical, 12)
                             .background(
                                 Capsule().fill(Color.white)
                             )
                     }
-                    .animation(.easeInOut(duration: 0.2), value: currentPage)
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.currentPage)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 40)
@@ -121,7 +118,9 @@ struct OnboardingView: View {
                     content
                     Spacer()
                 }
-                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+                .containerRelativeFrame(.vertical) { size, axis in
+                    size * 0.7
+                }
             }
         }
         .scrollIndicators(.hidden)
@@ -198,7 +197,9 @@ struct OnboardingView: View {
                     }.padding(.horizontal, 28)
                     Spacer()
                 }
-                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+                .containerRelativeFrame(.vertical) { size, axis in
+                    size * 0.7
+                }
             }
         }
         .scrollIndicators(.hidden)
@@ -268,7 +269,9 @@ struct OnboardingView: View {
                     }.padding(.horizontal, 28)
                     Spacer()
                 }
-                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+                .containerRelativeFrame(.vertical) { size, axis in
+                    size * 0.7
+                }
             }
         }
         .scrollIndicators(.hidden)
@@ -328,7 +331,9 @@ struct OnboardingView: View {
                     ).padding(.bottom, 60)
                     Spacer()
                 }
-                .frame(minHeight: UIScreen.main.bounds.height * 0.7)
+                .containerRelativeFrame(.vertical) { size, axis in
+                    size * 0.7
+                }
             }
         }
         .scrollIndicators(.hidden)
@@ -389,44 +394,6 @@ struct OnboardingView: View {
         .padding(16)
         .background(Color.white.opacity(0.1))
         .cornerRadius(16)
-    }
-
-    private func advance() {
-        if currentPage < 3 {
-            withAnimation { currentPage += 1 }
-        } else {
-            withAnimation {
-                hasSeenOnboarding = true
-                dismiss()
-            }
-        }
-    }
-
-    private let backgroundColors: [[Color]] = [
-
-        [
-            BreathingMode.calm.color,
-            Color(hue: 0.04, saturation: 0.85, brightness: 0.55),
-        ],
-
-        [
-            Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
-            Color(hue: 0.71, saturation: 0.85, brightness: 0.35),
-        ],
-
-        [
-            Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
-            Color(hue: 0.92, saturation: 0.70, brightness: 0.12),
-        ],
-
-        [
-            Color(hue: 0.48, saturation: 0.68, brightness: 0.48),
-            Color(hue: 0.52, saturation: 0.82, brightness: 0.18),
-        ],
-    ]
-
-    private var buttonTextColor: Color {
-        backgroundColors[currentPage][1]
     }
 }
 

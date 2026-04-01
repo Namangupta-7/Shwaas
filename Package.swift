@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "Shwaas",
     platforms: [
-        .iOS("16.0")
+        .iOS("26.0")
     ],
     products: [
         .iOSApplication(
@@ -38,9 +38,7 @@ let package = Package(
         .executableTarget(
             name: "AppModule",
             path: ".",
-            resources: [
-                .process("Assets.xcassets")
-            ]
+            resources: []
         )
     ],
     swiftLanguageVersions: [.version("6")]
