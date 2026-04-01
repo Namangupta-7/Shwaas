@@ -15,8 +15,8 @@ struct MandalaView: View {
     var body: some View {
         Canvas { ctx, size in
             switch style {
-            case .lotus:   drawLotus(ctx, size)
-            case .yantra:  drawYantra(ctx, size)
+            case .lotus: drawLotus(ctx, size)
+            case .yantra: drawYantra(ctx, size)
             case .chandra: drawChandra(ctx, size)
             }
         }
@@ -35,14 +35,23 @@ struct MandalaView: View {
             var p = Path()
             p.move(to: center)
             p.addLine(to: pt(center, petalR * 0.3, a1))
-            p.addQuadCurve(to: pt(center, petalR * 0.3, a2),
-                           control: pt(center, petalR, mid))
+            p.addQuadCurve(
+                to: pt(center, petalR * 0.3, a2),
+                control: pt(center, petalR, mid)
+            )
             p.closeSubpath()
             ctx.stroke(p, with: .color(color.opacity(opacity)), lineWidth: 1.5)
         }
 
         var ring = Path()
-        ring.addEllipse(in: CGRect(x: center.x - radius * 0.2, y: center.y - radius * 0.2, width: radius * 0.4, height: radius * 0.4))
+        ring.addEllipse(
+            in: CGRect(
+                x: center.x - radius * 0.2,
+                y: center.y - radius * 0.2,
+                width: radius * 0.4,
+                height: radius * 0.4
+            )
+        )
         ctx.stroke(ring, with: .color(color.opacity(opacity)), lineWidth: 1.0)
 
         dot(ctx, center, r: radius * 0.08)
@@ -55,15 +64,40 @@ struct MandalaView: View {
         for scale in [1.0, 0.85, 0.7] {
             let r = radius * scale
             var c = Path()
-            c.addEllipse(in: CGRect(x: center.x - r, y: center.y - r, width: r*2, height: r*2))
-            ctx.stroke(c, with: .color(color.opacity(opacity * (scale == 1.0 ? 0.8 : 1.8))), lineWidth: scale == 1.0 ? 1.5 : 2.0)
+            c.addEllipse(
+                in: CGRect(
+                    x: center.x - r,
+                    y: center.y - r,
+                    width: r * 2,
+                    height: r * 2
+                )
+            )
+            ctx.stroke(
+                c,
+                with: .color(
+                    color.opacity(opacity * (scale == 1.0 ? 0.8 : 1.8))
+                ),
+                lineWidth: scale == 1.0 ? 1.5 : 2.0
+            )
         }
 
         let innerR = radius * 0.7
 
-        triangle(ctx, center, r: innerR, rotation: -.pi / 2, baseOpacity: opacity)
+        triangle(
+            ctx,
+            center,
+            r: innerR,
+            rotation: -.pi / 2,
+            baseOpacity: opacity
+        )
 
-        triangle(ctx, center, r: innerR, rotation: .pi / 2, baseOpacity: opacity)
+        triangle(
+            ctx,
+            center,
+            r: innerR,
+            rotation: .pi / 2,
+            baseOpacity: opacity
+        )
 
         dot(ctx, center, r: radius * 0.08)
     }
@@ -81,13 +115,35 @@ struct MandalaView: View {
             let cy = center.y + sin(angle) * (radius * 0.35)
 
             var c = Path()
-            c.addEllipse(in: CGRect(x: cx - ringRadius, y: cy - ringRadius, width: ringRadius * 2, height: ringRadius * 2))
-            ctx.stroke(c, with: .color(color.opacity(opacity * 0.9)), lineWidth: 1.2)
+            c.addEllipse(
+                in: CGRect(
+                    x: cx - ringRadius,
+                    y: cy - ringRadius,
+                    width: ringRadius * 2,
+                    height: ringRadius * 2
+                )
+            )
+            ctx.stroke(
+                c,
+                with: .color(color.opacity(opacity * 0.9)),
+                lineWidth: 1.2
+            )
         }
 
         var outer = Path()
-        outer.addEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
-        ctx.stroke(outer, with: .color(color.opacity(opacity * 0.6)), lineWidth: 1.5)
+        outer.addEllipse(
+            in: CGRect(
+                x: center.x - radius,
+                y: center.y - radius,
+                width: radius * 2,
+                height: radius * 2
+            )
+        )
+        ctx.stroke(
+            outer,
+            with: .color(color.opacity(opacity * 0.6)),
+            lineWidth: 1.5
+        )
 
         dot(ctx, center, r: radius * 0.1)
     }
@@ -98,13 +154,24 @@ struct MandalaView: View {
 
     private func dot(_ ctx: GraphicsContext, _ center: CGPoint, r: CGFloat) {
         var p = Path()
-        p.addEllipse(in: CGRect(x: center.x - r, y: center.y - r,
-                                width: r * 2, height: r * 2))
+        p.addEllipse(
+            in: CGRect(
+                x: center.x - r,
+                y: center.y - r,
+                width: r * 2,
+                height: r * 2
+            )
+        )
         ctx.fill(p, with: .color(color.opacity(opacity)))
     }
 
-    private func triangle(_ ctx: GraphicsContext, _ center: CGPoint,
-                           r: CGFloat, rotation: CGFloat, baseOpacity: Double) {
+    private func triangle(
+        _ ctx: GraphicsContext,
+        _ center: CGPoint,
+        r: CGFloat,
+        rotation: CGFloat,
+        baseOpacity: Double
+    ) {
         var p = Path()
         for i in 0..<3 {
             let a = CGFloat(i) / 3 * .pi * 2 + rotation
@@ -113,6 +180,10 @@ struct MandalaView: View {
         }
         p.closeSubpath()
 
-        ctx.stroke(p, with: .color(color.opacity(baseOpacity * 2.2)), lineWidth: 2.2)
+        ctx.stroke(
+            p,
+            with: .color(color.opacity(baseOpacity * 2.2)),
+            lineWidth: 2.2
+        )
     }
 }

@@ -3,7 +3,8 @@ import SwiftUI
 struct ContentView: View {
 
     @State private var showSettings = false
-    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
+    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String =
+        AudioGuidanceMode.off.rawValue
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("appTheme") var appThemeTitle: String = "Dark"
     @State private var showOnboarding = false
@@ -33,19 +34,29 @@ struct ContentView: View {
                                     .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(.primary)
                                     .frame(width: 40, height: 40)
-                                    .background(.ultraThinMaterial, in: Circle())
+                                    .background(
+                                        .ultraThinMaterial,
+                                        in: Circle()
+                                    )
                             }
                             .buttonStyle(.plain)
                             .accessibilityLabel("Settings")
                         }
 
-                        Text("Pranayama — the ancient Indian art of conscious breath")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        Text(
+                            "Pranayama — the ancient Indian art of conscious breath"
+                        )
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                     }
 
                     if hSizeClass == .regular {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                        LazyVGrid(
+                            columns: [
+                                GridItem(.flexible()), GridItem(.flexible()),
+                            ],
+                            spacing: 20
+                        ) {
                             modeCards
                         }
                     } else {
@@ -95,8 +106,10 @@ struct ContentView: View {
                 title: "Shanti",
                 subtitle: "Calm",
                 description: "Cultivating inner stillness",
-                gradient: [BreathingMode.calm.color,
-                       Color(hue: 0.04, saturation: 0.85, brightness: 0.55)],
+                gradient: [
+                    BreathingMode.calm.color,
+                    Color(hue: 0.04, saturation: 0.85, brightness: 0.55),
+                ],
                 icon: "leaf.fill",
                 mandalaStyle: .lotus
             )
@@ -110,8 +123,10 @@ struct ContentView: View {
                 title: "Dharana",
                 subtitle: "Focus",
                 description: "Steady attention through breath",
-                gradient: [Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
-                       Color(hue: 0.71, saturation: 0.85, brightness: 0.35)],
+                gradient: [
+                    Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
+                    Color(hue: 0.71, saturation: 0.85, brightness: 0.35),
+                ],
                 icon: "scope",
                 mandalaStyle: .yantra
             )
@@ -125,8 +140,10 @@ struct ContentView: View {
                 title: "Nidra",
                 subtitle: "Sleep",
                 description: "Gentle descent into rest",
-                gradient: [Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
-                       Color(hue: 0.92, saturation: 0.70, brightness: 0.12)],
+                gradient: [
+                    Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
+                    Color(hue: 0.92, saturation: 0.70, brightness: 0.12),
+                ],
                 icon: "moon.stars.fill",
                 mandalaStyle: .chandra
             )
@@ -159,9 +176,16 @@ struct HomeCardView: View {
             .accessibilityHidden(true)
 
             GeometryReader { geo in
-                MandalaView(style: mandalaStyle, color: gradient.first ?? .white, opacity: 0.15)
-                    .frame(width: geo.size.height * 1.8, height: geo.size.height * 1.8)
-                    .position(x: geo.size.width - 20, y: geo.size.height / 2)
+                MandalaView(
+                    style: mandalaStyle,
+                    color: gradient.first ?? .white,
+                    opacity: 0.15
+                )
+                .frame(
+                    width: geo.size.height * 1.8,
+                    height: geo.size.height * 1.8
+                )
+                .position(x: geo.size.width - 20, y: geo.size.height / 2)
             }
             .accessibilityHidden(true)
 

@@ -16,7 +16,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showInfo = false
 
-    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
+    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String =
+        AudioGuidanceMode.off.rawValue
     @AppStorage("appTheme") var appTheme: String = AppTheme.dark.rawValue
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("hasSeenShantiInfo") private var hasSeenShantiInfo = false
@@ -40,7 +41,8 @@ struct SettingsView: View {
                     footer: Text(guidanceModeCaption)
                 ) {
                     Picker("Audio Guidance", selection: $audioGuidanceMode) {
-                        ForEach(AudioGuidanceMode.allCases, id: \.rawValue) { mode in
+                        ForEach(AudioGuidanceMode.allCases, id: \.rawValue) {
+                            mode in
                             Text(mode.rawValue).tag(mode.rawValue)
                         }
                     }
@@ -70,7 +72,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { dismiss() } label: {
+                    Button {
+                        dismiss()
+                    } label: {
                         Text("Done")
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
@@ -82,7 +86,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showInfo) {
                 InfoView()
-                    .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
+                    .preferredColorScheme(
+                        AppTheme(rawValue: appTheme)?.colorScheme
+                    )
                     .id(appTheme)
             }
         }
@@ -95,7 +101,8 @@ struct SettingsView: View {
         case .tones:
             return "A continuous, breath-synced swell of pink noise."
         case .speech:
-            return "A calm voice guiding each phase (Breathe In, Pause, Release)."
+            return
+                "A calm voice guiding each phase (Breathe In, Pause, Release)."
         }
     }
 

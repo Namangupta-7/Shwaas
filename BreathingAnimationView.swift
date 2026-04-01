@@ -6,9 +6,11 @@ struct BreathingAnimationView: View {
     let isRunning: Bool
 
     @State private var lastPhase: Phase?
-    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
+    @AppStorage("audioGuidanceMode") var audioGuidanceMode: String =
+        AudioGuidanceMode.off.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var startTime: TimeInterval = Date().timeIntervalSinceReferenceDate
+    @State private var startTime: TimeInterval = Date()
+        .timeIntervalSinceReferenceDate
     @State private var pauseOffset: TimeInterval = 0
 
     enum Phase {
@@ -82,15 +84,19 @@ struct BreathingAnimationView: View {
         .opacity(isRunning ? 1 : 0.4)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Breathing circle")
-        .accessibilityValue(lastPhase.map { phaseText(for: $0, cycleCount: 0) } ?? "Breathe in")
+        .accessibilityValue(
+            lastPhase.map { phaseText(for: $0, cycleCount: 0) } ?? "Breathe in"
+        )
     }
 
     private var timerDrivenView: some View {
         TimelineView(.animation) { timeline in
-            
-            let t = isRunning ? (timeline.date.timeIntervalSinceReferenceDate - startTime) : 0
+
+            let t =
+                isRunning
+                ? (timeline.date.timeIntervalSinceReferenceDate - startTime) : 0
             let ct = cycleTime(time: t)
-//            let phase = currentPhase(for: ct)
+            //            let phase = currentPhase(for: ct)
             let phase = isRunning ? currentPhase(for: ct) : .holdEmpty
             let currentCycle = timing.total > 0 ? Int(t / timing.total) : 0
 
@@ -124,7 +130,11 @@ struct BreathingAnimationView: View {
             .accessibilityLabel("Breathing circle")
             .accessibilityValue(phaseText(for: phase, cycleCount: currentCycle))
             .onChange(of: phase) { newValue in
-                handlePhaseChange(newValue, cycleCount: currentCycle, forceRun: isRunning)
+                handlePhaseChange(
+                    newValue,
+                    cycleCount: currentCycle,
+                    forceRun: isRunning
+                )
             }
         }
     }
@@ -202,11 +212,16 @@ struct BreathingAnimationView: View {
     private func phaseText(for phase: Phase, cycleCount: Int) -> String {
         switch phase {
         case .inhale:
-            if mode == .focus { return cycleCount % 2 == 0 ? "Breathe In Left" : "Breathe In Right" }
+            if mode == .focus {
+                return cycleCount % 2 == 0
+                    ? "Breathe In Left" : "Breathe In Right"
+            }
             return "Breathe In"
         case .holdFull: return "Pause"
         case .exhale:
-            if mode == .focus { return cycleCount % 2 == 0 ? "Release Right" : "Release Left" }
+            if mode == .focus {
+                return cycleCount % 2 == 0 ? "Release Right" : "Release Left"
+            }
             return "Release"
         case .holdEmpty: return "Pause"
         }
@@ -215,19 +230,34 @@ struct BreathingAnimationView: View {
     private func sizeColor(for s: CGFloat) -> Color {
         let minScale: CGFloat = 0.85
         let maxScale: CGFloat = 1.15
-        let t = min(1.0, max(0.0, Double((s - minScale) / (maxScale - minScale))))
+        let t = min(
+            1.0,
+            max(0.0, Double((s - minScale) / (maxScale - minScale)))
+        )
         func lerp(_ a: Double, _ b: Double) -> Double { a + (b - a) * t }
 
         switch mode {
         case .calm:
 
-            return Color(hue: lerp(0.06, 0.09), saturation: lerp(0.85, 0.95), brightness: lerp(0.60, 0.95))
+            return Color(
+                hue: lerp(0.06, 0.09),
+                saturation: lerp(0.85, 0.95),
+                brightness: lerp(0.60, 0.95)
+            )
         case .focus:
 
-            return Color(hue: lerp(0.70, 0.65), saturation: lerp(0.85, 0.70), brightness: lerp(0.40, 0.88))
+            return Color(
+                hue: lerp(0.70, 0.65),
+                saturation: lerp(0.85, 0.70),
+                brightness: lerp(0.40, 0.88)
+            )
         case .sleep:
 
-            return Color(hue: lerp(0.91, 0.87), saturation: lerp(0.70, 0.45), brightness: lerp(0.30, 0.72))
+            return Color(
+                hue: lerp(0.91, 0.87),
+                saturation: lerp(0.70, 0.45),
+                brightness: lerp(0.30, 0.72)
+            )
         }
     }
 
@@ -240,9 +270,13 @@ struct BreathingAnimationView: View {
         }
     }
 
-    private func handlePhaseChange(_ phase: Phase, cycleCount: Int, forceRun: Bool = false) {
+    private func handlePhaseChange(
+        _ phase: Phase,
+        cycleCount: Int,
+        forceRun: Bool = false
+    ) {
         guard isRunning || forceRun else { return }
-        
+
         if phase != lastPhase {
             let impact = UIImpactFeedbackGenerator(style: .light)
             impact.impactOccurred()
@@ -254,7 +288,8 @@ struct BreathingAnimationView: View {
             }
         }
 
-        let guidanceMode = AudioGuidanceMode(rawValue: audioGuidanceMode) ?? .off
+        let guidanceMode =
+            AudioGuidanceMode(rawValue: audioGuidanceMode) ?? .off
         guard guidanceMode != .off else {
             lastPhase = phase
             return
@@ -266,22 +301,32 @@ struct BreathingAnimationView: View {
         switch guidanceMode {
         case .tones:
             switch phase {
-            case .inhale: SoundManager.shared.playInhaleSequence(duration: timing.inhale)
+            case .inhale:
+                SoundManager.shared.playInhaleSequence(duration: timing.inhale)
             case .holdFull, .holdEmpty: SoundManager.shared.playHold()
-            case .exhale: SoundManager.shared.playExhaleSequence(duration: timing.exhale)
+            case .exhale:
+                SoundManager.shared.playExhaleSequence(duration: timing.exhale)
             }
         case .speech:
             switch phase {
             case .inhale:
                 if mode == .focus {
-                    VoiceGuidanceManager.shared.speak(cycleCount % 2 == 0 ? "Block right, breathe in left" : "Block left, breathe in right")
+                    VoiceGuidanceManager.shared.speak(
+                        cycleCount % 2 == 0
+                            ? "Block right, breathe in left"
+                            : "Block left, breathe in right"
+                    )
                 } else {
                     VoiceGuidanceManager.shared.speak("Breathe in")
                 }
             case .holdFull: VoiceGuidanceManager.shared.speak("Pause")
             case .exhale:
                 if mode == .focus {
-                    VoiceGuidanceManager.shared.speak(cycleCount % 2 == 0 ? "Block left, release right" : "Block right, release left")
+                    VoiceGuidanceManager.shared.speak(
+                        cycleCount % 2 == 0
+                            ? "Block left, release right"
+                            : "Block right, release left"
+                    )
                 } else {
                     VoiceGuidanceManager.shared.speak("Release")
                 }

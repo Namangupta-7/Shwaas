@@ -25,13 +25,19 @@ struct BreathingView: View {
     init(mode: BreathingMode) {
         self.mode = mode
 
-        _hasSeenShantiInfo = AppStorage(wrappedValue: false, "hasSeenShantiInfo")
-        _hasSeenDharanaInfo = AppStorage(wrappedValue: false, "hasSeenDharanaInfo")
+        _hasSeenShantiInfo = AppStorage(
+            wrappedValue: false,
+            "hasSeenShantiInfo"
+        )
+        _hasSeenDharanaInfo = AppStorage(
+            wrappedValue: false,
+            "hasSeenDharanaInfo"
+        )
         _hasSeenNidraInfo = AppStorage(wrappedValue: false, "hasSeenNidraInfo")
     }
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
-    @Environment(\.verticalSizeClass)   private var vSizeClass
+    @Environment(\.verticalSizeClass) private var vSizeClass
 
     private var isLandscape: Bool {
         hSizeClass == .regular || vSizeClass == .compact
@@ -60,7 +66,9 @@ struct BreathingView: View {
                         .font(.system(size: 28, weight: .thin))
                         .italic()
                         .foregroundColor(.primary.opacity(0.8))
-                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                        .transition(
+                            .opacity.combined(with: .scale(scale: 0.98))
+                        )
                 }
                 .transition(.opacity)
                 .zIndex(10)
@@ -200,7 +208,9 @@ struct BreathingView: View {
                 VStack(spacing: vSizeClass == .compact ? 14 : 24) {
                     VStack(spacing: 4) {
                         Text(titleText)
-                            .font(vSizeClass == .compact ? .title2 : .largeTitle)
+                            .font(
+                                vSizeClass == .compact ? .title2 : .largeTitle
+                            )
                             .fontWeight(.bold)
                         Text(subtitleText)
                             .font(.subheadline)
@@ -223,7 +233,8 @@ struct BreathingView: View {
                             Slider(value: $selectedMinutes, in: 1...5, step: 1)
                                 .onChange(of: selectedMinutes) { newValue in
                                     if newValue == 1 || newValue == 5 {
-                                        let generator = UISelectionFeedbackGenerator()
+                                        let generator =
+                                            UISelectionFeedbackGenerator()
                                         generator.selectionChanged()
                                     }
                                     resetTimer()
@@ -236,13 +247,19 @@ struct BreathingView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Capsule().fill(Color.primary.opacity(0.15)))
+                            .background(
+                                Capsule().fill(Color.primary.opacity(0.15))
+                            )
                     }
                 }
                 .frame(maxWidth: 300)
                 .padding(.trailing, 32)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .center
+            )
         }
     }
 
@@ -273,7 +290,9 @@ struct BreathingView: View {
         }
         .frame(height: 18)
         .padding(.horizontal)
-        .accessibilityLabel("Session progress, \(Int(progress * 100)) percent elapsed")
+        .accessibilityLabel(
+            "Session progress, \(Int(progress * 100)) percent elapsed"
+        )
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: seek(to: CGFloat(progress) + 0.05)
@@ -337,7 +356,8 @@ struct BreathingView: View {
         startTimer()
     }
 
-    @AppStorage("audioGuidanceMode") private var audioGuidanceMode: String = AudioGuidanceMode.off.rawValue
+    @AppStorage("audioGuidanceMode") private var audioGuidanceMode: String =
+        AudioGuidanceMode.off.rawValue
 
     private func completeSession() {
         completedMinutes = Int(selectedMinutes)
@@ -411,9 +431,12 @@ struct BreathingView: View {
 
     private var backgroundColor: Color {
         switch mode {
-        case .calm:  return BreathingMode.calm.color.opacity(0.08)
+        case .calm: return BreathingMode.calm.color.opacity(0.08)
         case .focus: return Color.indigo.opacity(0.12)
-        case .sleep: return Color(hue: 0.88, saturation: 0.60, brightness: 0.70).opacity(0.10)
+        case .sleep:
+            return Color(hue: 0.88, saturation: 0.60, brightness: 0.70).opacity(
+                0.10
+            )
         }
     }
 
@@ -476,7 +499,12 @@ struct BreathingView: View {
                         .padding(.horizontal, 48)
                         .padding(.vertical, 14)
                         .background(Capsule().fill(Color.white.opacity(0.15)))
-                        .overlay(Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1))
+                        .overlay(
+                            Capsule().stroke(
+                                Color.white.opacity(0.25),
+                                lineWidth: 1
+                            )
+                        )
                 }
                 .accessibilityLabel("Return to home screen")
 
@@ -487,7 +515,7 @@ struct BreathingView: View {
 
     private var completionSanskrit: String {
         switch mode {
-        case .calm:  return "Shanti"
+        case .calm: return "Shanti"
         case .focus: return "Dharana"
         case .sleep: return "Nidra"
         }
@@ -495,7 +523,7 @@ struct BreathingView: View {
 
     private var completionEnglish: String {
         switch mode {
-        case .calm:  return "Peace"
+        case .calm: return "Peace"
         case .focus: return "Clarity"
         case .sleep: return "Rest"
         }
@@ -503,7 +531,7 @@ struct BreathingView: View {
 
     private var completionEmoji: String {
         switch mode {
-        case .calm:  return "🌿"
+        case .calm: return "🌿"
         case .focus: return "🔆"
         case .sleep: return "🌙"
         }
@@ -511,7 +539,7 @@ struct BreathingView: View {
 
     private var completionMessage: String {
         switch mode {
-        case .calm:  return "Carry this stillness with you."
+        case .calm: return "Carry this stillness with you."
         case .focus: return "Your mind is clearer now. Go do great things."
         case .sleep: return "Let your breath carry you gently into rest."
         }

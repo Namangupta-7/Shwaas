@@ -6,7 +6,7 @@ struct OnboardingView: View {
     @State private var currentPage = 0
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
-    @Environment(\.verticalSizeClass)   private var vSizeClass
+    @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.dismiss) private var dismiss
 
     private var isLandscape: Bool {
@@ -38,9 +38,19 @@ struct OnboardingView: View {
                     HStack(spacing: 8) {
                         ForEach(0..<4) { i in
                             Circle()
-                                .fill(i == currentPage ? Color.white : Color.white.opacity(0.35))
-                                .frame(width: i == currentPage ? 10 : 7, height: i == currentPage ? 10 : 7)
-                                .animation(.spring(response: 0.3), value: currentPage)
+                                .fill(
+                                    i == currentPage
+                                        ? Color.white
+                                        : Color.white.opacity(0.35)
+                                )
+                                .frame(
+                                    width: i == currentPage ? 10 : 7,
+                                    height: i == currentPage ? 10 : 7
+                                )
+                                .animation(
+                                    .spring(response: 0.3),
+                                    value: currentPage
+                                )
                         }
                     }
 
@@ -76,13 +86,15 @@ struct OnboardingView: View {
 
                 Spacer().frame(height: 8)
 
-                Text("\"Chale vāte chalaṁ chittam\nnishchale nishchalaṁ bhavet.\"")
-                    .font(.title3)
-                    .fontWeight(.light)
-                    .foregroundColor(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .italic()
-                    .padding(.horizontal, isLandscape ? 0 : 32)
+                Text(
+                    "\"Chale vāte chalaṁ chittam\nnishchale nishchalaṁ bhavet.\""
+                )
+                .font(.title3)
+                .fontWeight(.light)
+                .foregroundColor(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+                .italic()
+                .padding(.horizontal, isLandscape ? 0 : 32)
 
                 Text("When the breath is steady, the mind becomes steady.")
                     .font(.footnote)
@@ -131,9 +143,24 @@ struct OnboardingView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 16) {
-                        practiceRow(icon: "leaf.fill", sanskrit: "Shanti", english: "Calm", description: "Cultivating inner stillness")
-                        practiceRow(icon: "scope", sanskrit: "Dharana", english: "Focus", description: "Steady attention through breath")
-                        practiceRow(icon: "moon.stars.fill", sanskrit: "Nidra", english: "Sleep", description: "Gentle descent into rest")
+                        practiceRow(
+                            icon: "leaf.fill",
+                            sanskrit: "Shanti",
+                            english: "Calm",
+                            description: "Cultivating inner stillness"
+                        )
+                        practiceRow(
+                            icon: "scope",
+                            sanskrit: "Dharana",
+                            english: "Focus",
+                            description: "Steady attention through breath"
+                        )
+                        practiceRow(
+                            icon: "moon.stars.fill",
+                            sanskrit: "Nidra",
+                            english: "Sleep",
+                            description: "Gentle descent into rest"
+                        )
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -142,12 +169,32 @@ struct OnboardingView: View {
             } else {
                 VStack(spacing: 0) {
                     Spacer()
-                    Text("Three Practices").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
-                    Text("A return to breath").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
+                    Text("Three Practices").font(.title).fontWeight(.bold)
+                        .foregroundColor(.white).padding(.bottom, 8)
+                    Text("A return to breath").font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7)).padding(
+                            .bottom,
+                            40
+                        )
                     VStack(spacing: 20) {
-                        practiceRow(icon: "leaf.fill", sanskrit: "Shanti", english: "Calm", description: "Cultivating inner stillness")
-                        practiceRow(icon: "scope", sanskrit: "Dharana", english: "Focus", description: "Steady attention through breath")
-                        practiceRow(icon: "moon.stars.fill", sanskrit: "Nidra", english: "Sleep", description: "Gentle descent into rest")
+                        practiceRow(
+                            icon: "leaf.fill",
+                            sanskrit: "Shanti",
+                            english: "Calm",
+                            description: "Cultivating inner stillness"
+                        )
+                        practiceRow(
+                            icon: "scope",
+                            sanskrit: "Dharana",
+                            english: "Focus",
+                            description: "Steady attention through breath"
+                        )
+                        practiceRow(
+                            icon: "moon.stars.fill",
+                            sanskrit: "Nidra",
+                            english: "Sleep",
+                            description: "Gentle descent into rest"
+                        )
                     }.padding(.horizontal, 28)
                     Spacer()
                 }
@@ -173,9 +220,21 @@ struct OnboardingView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 16) {
-                        audioRow(icon: "speaker.slash.fill", title: "Off", description: "Pure silence")
-                        audioRow(icon: "waveform", title: "Noise", description: "Pink noise follows your breath")
-                        audioRow(icon: "mic.fill", title: "Speech", description: "A gentle voice guides each phase")
+                        audioRow(
+                            icon: "speaker.slash.fill",
+                            title: "Off",
+                            description: "Pure silence"
+                        )
+                        audioRow(
+                            icon: "waveform",
+                            title: "Noise",
+                            description: "Pink noise follows your breath"
+                        )
+                        audioRow(
+                            icon: "mic.fill",
+                            title: "Speech",
+                            description: "A gentle voice guides each phase"
+                        )
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -184,12 +243,28 @@ struct OnboardingView: View {
             } else {
                 VStack(spacing: 0) {
                     Spacer()
-                    Text("Sound Guidance").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
-                    Text("Choose what you hear during practice").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
+                    Text("Sound Guidance").font(.title).fontWeight(.bold)
+                        .foregroundColor(.white).padding(.bottom, 8)
+                    Text("Choose what you hear during practice").font(
+                        .subheadline
+                    ).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
                     VStack(spacing: 16) {
-                        audioRow(icon: "speaker.slash.fill", title: "Off", description: "Pure silence")
-                        audioRow(icon: "waveform", title: "Noise", description: "Pink noise follows your breath — swells as you breathe in, dissolves on pause")
-                        audioRow(icon: "mic.fill", title: "Speech", description: "A gentle voice guides each phase")
+                        audioRow(
+                            icon: "speaker.slash.fill",
+                            title: "Off",
+                            description: "Pure silence"
+                        )
+                        audioRow(
+                            icon: "waveform",
+                            title: "Noise",
+                            description:
+                                "Pink noise follows your breath — swells as you breathe in, dissolves on pause"
+                        )
+                        audioRow(
+                            icon: "mic.fill",
+                            title: "Speech",
+                            description: "A gentle voice guides each phase"
+                        )
                     }.padding(.horizontal, 28)
                     Spacer()
                 }
@@ -220,22 +295,37 @@ struct OnboardingView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Text("Turn your device sideways during a session. The interface adapts instantly, giving the breath room to expand while keeping the time clearly visible.")
-                        .font(.body)
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineSpacing(6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(
+                        "Turn your device sideways during a session. The interface adapts instantly, giving the breath room to expand while keeping the time clearly visible."
+                    )
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineSpacing(6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(60)
                 .frame(minHeight: 400)
             } else {
                 VStack(spacing: 0) {
                     Spacer()
-                    Image(systemName: "rectangle.landscape.rotate").font(.system(size: 64, weight: .thin)).foregroundColor(.white).padding(.bottom, 24)
-                    Text("Desk Mode").font(.title).fontWeight(.bold).foregroundColor(.white).padding(.bottom, 8)
-                    Text("For your nightstand or desk").font(.subheadline).foregroundColor(.white.opacity(0.7)).padding(.bottom, 40)
-                    Text("Rotate your device to enter Desk Mode. This gives the breath space to expand visually, allowing you to practice without holding your device.")
-                        .font(.body).foregroundColor(.white.opacity(0.9)).multilineTextAlignment(.center).lineSpacing(6).padding(.horizontal, 32).padding(.bottom, 60)
+                    Image(systemName: "rectangle.landscape.rotate").font(
+                        .system(size: 64, weight: .thin)
+                    ).foregroundColor(.white).padding(.bottom, 24)
+                    Text("Desk Mode").font(.title).fontWeight(.bold)
+                        .foregroundColor(.white).padding(.bottom, 8)
+                    Text("For your nightstand or desk").font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7)).padding(
+                            .bottom,
+                            40
+                        )
+                    Text(
+                        "Rotate your device to enter Desk Mode. This gives the breath space to expand visually, allowing you to practice without holding your device."
+                    )
+                    .font(.body).foregroundColor(.white.opacity(0.9))
+                    .multilineTextAlignment(.center).lineSpacing(6).padding(
+                        .horizontal,
+                        32
+                    ).padding(.bottom, 60)
                     Spacer()
                 }
                 .frame(minHeight: UIScreen.main.bounds.height * 0.7)
@@ -244,7 +334,12 @@ struct OnboardingView: View {
         .scrollIndicators(.hidden)
     }
 
-    private func practiceRow(icon: String, sanskrit: String, english: String, description: String) -> some View {
+    private func practiceRow(
+        icon: String,
+        sanskrit: String,
+        english: String,
+        description: String
+    ) -> some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 22))
@@ -271,7 +366,9 @@ struct OnboardingView: View {
         .cornerRadius(16)
     }
 
-    private func audioRow(icon: String, title: String, description: String) -> some View {
+    private func audioRow(icon: String, title: String, description: String)
+        -> some View
+    {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 20))
@@ -307,17 +404,25 @@ struct OnboardingView: View {
 
     private let backgroundColors: [[Color]] = [
 
-        [BreathingMode.calm.color,
-         Color(hue: 0.04, saturation: 0.85, brightness: 0.55)],
+        [
+            BreathingMode.calm.color,
+            Color(hue: 0.04, saturation: 0.85, brightness: 0.55),
+        ],
 
-        [Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
-         Color(hue: 0.71, saturation: 0.85, brightness: 0.35)],
+        [
+            Color(hue: 0.67, saturation: 0.78, brightness: 0.72),
+            Color(hue: 0.71, saturation: 0.85, brightness: 0.35),
+        ],
 
-        [Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
-         Color(hue: 0.92, saturation: 0.70, brightness: 0.12)],
+        [
+            Color(hue: 0.88, saturation: 0.58, brightness: 0.52),
+            Color(hue: 0.92, saturation: 0.70, brightness: 0.12),
+        ],
 
-        [Color(hue: 0.48, saturation: 0.68, brightness: 0.48),
-         Color(hue: 0.52, saturation: 0.82, brightness: 0.18)]
+        [
+            Color(hue: 0.48, saturation: 0.68, brightness: 0.48),
+            Color(hue: 0.52, saturation: 0.82, brightness: 0.18),
+        ],
     ]
 
     private var buttonTextColor: Color {

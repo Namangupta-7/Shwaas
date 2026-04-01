@@ -31,11 +31,13 @@ struct InfoView: View {
                         Label("Why", systemImage: "sunrise")
                             .font(.headline)
 
-                        Text("""
-As a child, I watched my mother practice yoga each morning. Years later, during stress and sleeplessness, I rediscovered those same breathing rhythms.
+                        Text(
+                            """
+                            As a child, I watched my mother practice yoga each morning. Years later, during stress and sleeplessness, I rediscovered those same breathing rhythms.
 
-Shwaas is my reinterpretation of that inherited calm.
-""")
+                            Shwaas is my reinterpretation of that inherited calm.
+                            """
+                        )
                         .foregroundColor(.secondary)
                     }
 
@@ -44,11 +46,13 @@ Shwaas is my reinterpretation of that inherited calm.
                         Label("Reinterpreting Pranayama", systemImage: "leaf")
                             .font(.headline)
 
-                        Text("""
-Inspired by classical pranayama practices such as Sama Vritti, Nadi Shodhana, and extended calming breath cycles, Shwaas translates traditional rhythm into visual motion and guided timing.
+                        Text(
+                            """
+                            Inspired by classical pranayama practices such as Sama Vritti, Nadi Shodhana, and extended calming breath cycles, Shwaas translates traditional rhythm into visual motion and guided timing.
 
-It does not replicate tradition — it reimagines it digitally.
-""")
+                            It does not replicate tradition — it reimagines it digitally.
+                            """
+                        )
                         .foregroundColor(.secondary)
                     }
 
@@ -57,9 +61,18 @@ It does not replicate tradition — it reimagines it digitally.
                         Label("Rhythms", systemImage: "timer")
                             .font(.headline)
 
-                        breathingRow(title: "Shanti", subtitle: "Equal, grounding breath")
-                        breathingRow(title: "Dharana", subtitle: "Focused alternating rhythm")
-                        breathingRow(title: "Nidra", subtitle: "Extended calming cycle")
+                        breathingRow(
+                            title: "Shanti",
+                            subtitle: "Equal, grounding breath"
+                        )
+                        breathingRow(
+                            title: "Dharana",
+                            subtitle: "Focused alternating rhythm"
+                        )
+                        breathingRow(
+                            title: "Nidra",
+                            subtitle: "Extended calming cycle"
+                        )
                     }
 
                     // Closing
@@ -67,11 +80,13 @@ It does not replicate tradition — it reimagines it digitally.
                         Label("A Quiet Practice", systemImage: "heart")
                             .font(.headline)
 
-                        Text("""
-Shwaas is not a productivity tool.
+                        Text(
+                            """
+                            Shwaas is not a productivity tool.
 
-It is a pause — a reminder that breath remains our most accessible anchor.
-""")
+                            It is a pause — a reminder that breath remains our most accessible anchor.
+                            """
+                        )
                         .foregroundColor(.secondary)
                     }
 
