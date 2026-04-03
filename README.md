@@ -12,6 +12,16 @@ Shwaas is a premium breathing and meditation application designed to bring tranq
 
 ---
 
+## 📽️ Demo
+
+<div align="center">
+  <video src="Media/demo.mp4" width="100%" controls>
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+---
+
 ## 🧘 Key Features
 
 ### 🌟 Three Specialized Practices
