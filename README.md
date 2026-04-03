@@ -15,10 +15,11 @@ Shwaas is a premium breathing and meditation application designed to bring tranq
 ## 📽️ Demo
 
 <div align="center">
-  <video width="100%" height="auto" controls>
-    <source src="https://github.com/Namangupta-7/Shwaas/raw/main/Media/demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <a href="https://youtu.be/xdprg7lwt1w?si=Y7v0IHKJLTmIH_vA">
+    <img src="https://img.youtube.com/vi/xdprg7lwt1w/maxresdefault.jpg" width="100%" alt="Shwaas App Demo">
+  </a>
+  <br>
+  <em><a href="https://youtu.be/xdprg7lwt1w?si=Y7v0IHKJLTmIH_vA">Watch the high-quality demo on YouTube</a></em>
 </div>
 
 ---
